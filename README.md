@@ -35,6 +35,7 @@ Most Node.js boilerplates suffer from two extremes: they are either heavily bloa
 ├── vite.config.ts
 ├── vitest.config.ts
 └── README.md
+``
 
 ## 🗺️ Roadmap & Development Phases
 
