@@ -1,4 +1,4 @@
-# nodestar
+# nodestar Node starter kit
 
 > A modular, back-to-basics Node.js + Express starter engineered for production rigor: zero bloat, fully decoupled modules, and lightning-fast testing out of the box.
 
