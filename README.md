@@ -43,7 +43,7 @@ Most Node.js boilerplates suffer from two extremes: they are either heavily bloa
 | Phase | Focus | Core Deliverables | Status |
 | :--- | :--- | :--- | :---: |
 | **Phase 1** | **Foundation & Testing** | Project structure, TypeScript config, Vitest setup (<50ms smoke test), `.env` validation | 🟢 **Completed** |
-| **Phase 2** | **Security & Auth** | Secure Signup / Login flow, password hashing best practices, JWT / Session handling | 🟡 **In Progress** |
+| **Phase 2** | **Auth, Tests & Deploy (v0.1)** | Secure Signup/Login flow, colocated `auth.test.ts`, password hashing, basic deployment guide | 🟡 **In Progress** |
 | **Phase 3** | **Core API & Architecture** | Standardized API response format, global error middleware, modular CRUD pattern | ⚪ **Planned** |
 | **Phase 4** | **Production Rigor & Docs** | Integration HTTP test suite, "how to strip code" guide, CI/CD & Deployment config | ⚪ **Planned** |
 | **Phase 5** | **Frontend Integration** | Optional lightweight GUI layer (SolidJS or React) | ⚪ **Planned** |
