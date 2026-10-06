@@ -18,6 +18,7 @@ Most Node.js boilerplates suffer from two extremes: they are either heavily bloa
 
 ## 📂 Project Architecture
 
+```text
 /
 ├── src/
 │   ├── config/          # Environment variable validation (Zod) & DB setup
