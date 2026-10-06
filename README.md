@@ -36,42 +36,41 @@ Most Node.js boilerplates suffer from two extremes: they are either heavily bloa
 ├── vitest.config.ts
 └── README.md
 ```
+---
+
 ## 🗺️ Roadmap & Development Phases
-[x] Phase 1: Foundation & Test Harness
 
-Project directory structure & TypeScript configuration
+| Phase | Focus | Core Deliverables | Status |
+| :--- | :--- | :--- | :---: |
+| **Phase 1** | **Foundation & Testing** | Project structure, TypeScript config, Vitest setup (<50ms smoke test), `.env` validation | 🟢 **Completed** |
+| **Phase 2** | **Security & Auth** | Secure Signup / Login flow, password hashing best practices, JWT / Session handling | 🟡 **In Progress** |
+| **Phase 3** | **Core API & Architecture** | Standardized API response format, global error middleware, modular CRUD pattern | ⚪ **Planned** |
+| **Phase 4** | **Production Rigor & Docs** | Integration HTTP test suite, "how to strip code" guide, CI/CD & Deployment config | ⚪ **Planned** |
+| **Phase 5** | **Frontend Integration** | Optional lightweight GUI layer (SolidJS or React) | ⚪ **Planned** |
 
-Fast Vitest execution setup (<50ms smoke test baseline)
-
-Type-safe .env schema validation
-
-[ ] Phase 2: Security & Authentication Baseline
-
-Secure Signup / Login flow
-
-Password hashing & security best practices
-
-Session / JWT token handling
-
-[ ] Phase 3: Core API Architecture
-
-Standardized API response format & global error middleware
-
-Modular CRUD example pattern
-
-[ ] Phase 4: Production Rigor & Docs
-
-Integration test suite for HTTP endpoints
-
-Modularization guide: How to strip sample code without breaking tests
-
-CI/CD & Deployment configuration
-
-[ ] Phase 5: Lightweight Frontend Integration
-
-Optional GUI layer integration (SolidJS or React)
+---
 
 ## 🚀 Quick Start
+
+Get your environment up and running in less than 2 minutes.
+
+### 1. Prerequisites
+Ensure you have **Node.js 20+** and **npm** installed on your machine.
+
+### 2. Setup Project
+
+```bash
+# Clone the repository
+git clone [https://github.com/your-username/nodestar.git](https://github.com/your-username/nodestar.git)
+cd nodestar
+
+# Install dependencies
+npm install
+
+# Configure environment variables
+cp .env.example .env
+```
+---
 
 ## 🤝 How to Contribute
 Contributions, issues, and feature requests are welcome!
