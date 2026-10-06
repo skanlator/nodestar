@@ -72,6 +72,18 @@ cp .env.example .env
 ```
 ---
 
+### 3. Development CommandsCommandActionnpm
+
+### 3. Development Commands
+
+| Command | Action |
+| --- | --- |
+| `npm run dev` | Start development server with hot-reloading |
+| `npm test` | Run the Vitest test suite once |
+| `npm run test:watch` | Run tests in interactive watch mode |
+| `npm run build` | Build the project for production |
+| `npm start` | Run the compiled production build |
+
 ## 🤝 How to Contribute
 Contributions, issues, and feature requests are welcome!
 
