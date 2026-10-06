@@ -71,4 +71,47 @@ CI/CD & Deployment configuration
 
 Optional GUI layer integration (SolidJS or React)
 
-🚀 Quick Start
+## 🚀 Quick Start
+
+## 🤝 How to Contribute
+Contributions, issues, and feature requests are welcome!
+
+As the project is currently in Phase 1, the priority is keeping the core footprint minimal and decoupled. If you find a bug or have suggestions for improving test execution speed or architecture, feel free to open an issue or start a discussion.
+
+## 📄 License
+MIT
+
+---
+
+### `package.json`
+
+```json
+{
+  "name": "nodestar",
+  "version": "0.1.0",
+  "description": "A modular, back-to-basics Node.js + Express starter built with tests and docs.",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "vite build",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.12.12",
+    "supertest": "^7.0.0",
+    "@types/supertest": "^6.0.2",
+    "tsx": "^4.10.5",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.11",
+    "vitest": "^1.6.0"
+  }
+}
