@@ -25,10 +25,12 @@ Most Node.js boilerplates suffer from two extremes: they are either heavily bloa
 │   ├── shared/          # Global middlewares, error handlers, and core utilities
 │   └── modules/         # Domain-driven feature modules
 │       └── auth/
-│           ├── auth.controller.ts
-│           ├── auth.service.ts
-│           ├── auth.schemas.ts
-│           └── auth.test.ts   # Colocated tests next to module logic
+│           ├── auth.types.ts      # Domain interfaces & TypeScript types
+│           ├── auth.schema.ts     # Zod validation schemas (DTOs)
+│           ├── auth.service.ts    # Business logic (hashing, token generation)
+│           ├── auth.controller.ts # Express HTTP controllers
+│           ├── auth.routes.ts     # Express route definitions
+│           └── auth.test.ts       # Colocated integration/unit tests
 ├── tests/               # Global test harness setup, fixtures, and mocks
 ├── docs/                # Architecture specs, module removal guides, and deployment docs
 ├── .env.example
