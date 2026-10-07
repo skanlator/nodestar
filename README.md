@@ -1,4 +1,4 @@
-# nodestar Node starter kit
+# nodestar (v0.1) Node starter kit
 
 > A modular, back-to-basics Node.js + Express starter engineered for production rigor: zero bloat, fully decoupled modules, and lightning-fast testing out of the box.
 
@@ -45,10 +45,10 @@ Most Node.js boilerplates suffer from two extremes: they are either heavily bloa
 | Phase | Focus | Core Deliverables | Status |
 | :--- | :--- | :--- | :---: |
 | **Phase 1** | **Foundation & Testing** | Project structure, TypeScript config, Vitest setup (<50ms smoke test), `.env` validation | 🟢 **Completed** |
-| **Phase 2** | **Auth, Tests & Deploy (v0.1)** | Secure Signup/Login flow, colocated `auth.test.ts`, password hashing, basic deployment guide | 🟡 **In Progress** |
-| **Phase 3** | **Core API & Architecture** | Standardized API response format, global error middleware, modular CRUD pattern | ⚪ **Planned** |
-| **Phase 4** | **Production Rigor & Docs** | Integration HTTP test suite, "how to strip code" guide, CI/CD & Deployment config | ⚪ **Planned** |
-| **Phase 5** | **Frontend Integration** | Optional lightweight GUI layer (SolidJS or React) | ⚪ **Planned** |
+| **Phase 2** | **Auth, Tests & Deploy (v0.1)** | Secure Signup/Login flow, colocated `auth.test.ts`, password hashing, basic deployment guide | 🟢 **Completed** |
+| **Phase 3** | **Core API & Architecture** (v0.2) | Standardized API response format, global error middleware, modular CRUD pattern | 🟡 **In Progress** |
+| **Phase 4** | **Production Rigor & Docs** (v0.3) | Integration HTTP test suite, "how to strip code" guide, CI/CD & Deployment config | ⚪ **Planned** |
+| **Phase 5** | **Frontend Integration** (v0.4) | Optional lightweight GUI layer (SolidJS or React) | ⚪ **Planned** |
 
 ---
 
