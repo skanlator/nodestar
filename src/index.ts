@@ -1,5 +1,6 @@
 import express, { Express, Request, Response } from 'express';
 import { env } from './config/env.ts';
+import { errorHandler } from './shared/middlewares/error.middleware.ts';
 
 const app: Express = express();
 
@@ -15,6 +16,9 @@ app.get('/health', (_req: Request, res: Response) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+// Global error handling middleware (must be registered last)
+app.use(errorHandler);
 
 // Start server if not running in test mode
 if (env.NODE_ENV !== 'test') {
