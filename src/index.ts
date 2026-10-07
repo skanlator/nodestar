@@ -1,11 +1,7 @@
 import express, { Express, Request, Response } from 'express';
-import dotenv from 'dotenv';
-
-// Load environment variables
-dotenv.config();
+import { env } from './config/env.ts';
 
 const app: Express = express();
-const port = process.env.PORT || 3000;
 
 // Core middlewares
 app.use(express.json());
@@ -21,9 +17,9 @@ app.get('/health', (_req: Request, res: Response) => {
 });
 
 // Start server if not running in test mode
-if (process.env.NODE_ENV !== 'test') {
-  app.listen(port, () => {
-    console.log(`[nodestar] Server running on http://localhost:${port}`);
+if (env.NODE_ENV !== 'test') {
+  app.listen(env.PORT, () => {
+    console.log(`[nodestar] Server running on http://localhost:${env.PORT}`);
   });
 }
 
