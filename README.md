@@ -63,7 +63,7 @@ Ensure you have **Node.js 20+** and **npm** installed on your machine.
 
 ```bash
 # Clone the repository
-git clone [https://github.com/your-username/nodestar.git](https://github.com/your-username/nodestar.git)
+git clone [https://github.com/skanlator/nodestar/tree/main](https://github.com/skanlator/nodestar/tree/main)
 cd nodestar
 
 # Install dependencies
