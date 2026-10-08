@@ -1,3 +1,5 @@
+# `README.md`
+
 # nodestar (v0.1) Node starter kit
 
 > A modular, back-to-basics Node.js + Express starter engineered for production rigor: zero bloat, fully decoupled modules, and lightning-fast testing out of the box.
@@ -21,34 +23,40 @@ Most Node.js boilerplates suffer from two extremes: they are either heavily bloa
 ```text
 /
 ├── src/
-│   ├── config/          # Environment variable validation (Zod) & DB setup
+│   ├── config/          # Environment variable validation (Zod) & app configuration
 │   ├── shared/          # Global middlewares, error handlers, and core utilities
+│   │   ├── db/          # Database connection, client setup, and Drizzle schemas
+│   │   ├── errors/      # Custom AppError class
+│   │   └── middlewares/ # Error handling and Zod validation middlewares
 │   └── modules/         # Domain-driven feature modules
 │       └── auth/
 │           ├── auth.types.ts      # Domain interfaces & TypeScript types
 │           ├── auth.schema.ts     # Zod validation schemas (DTOs)
-│           ├── auth.service.ts    # Business logic (hashing, token generation)
+│           ├── auth.service.ts    # Business logic & DB queries
 │           ├── auth.controller.ts # Express HTTP controllers
 │           ├── auth.routes.ts     # Express route definitions
 │           └── auth.test.ts       # Colocated integration/unit tests
 ├── tests/               # Global test harness setup, fixtures, and mocks
-├── docs/                # Architecture specs, module removal guides, and deployment docs
+├── docs/                # Architecture specs, deployment guides, and DB setup
 ├── .env.example
+├── docker-compose.yml   # Local PostgreSQL database container setup
+├── drizzle.config.ts    # Drizzle ORM & migration CLI configuration
 ├── vite.config.ts
 ├── vitest.config.ts
 └── README.md
 ```
+
 ---
 
 ## 🗺️ Roadmap & Development Phases
 
 | Phase | Focus | Core Deliverables | Status |
 | :--- | :--- | :--- | :---: |
-| **Phase 1** | **Foundation & Testing** | Project structure, TypeScript config, Vitest setup (<50ms smoke test), `.env` validation | 🟢 **Completed** |
-| **Phase 2** | **Auth, Tests & Deploy (v0.1)** | Secure Signup/Login flow, colocated `auth.test.ts`, password hashing, basic deployment guide | 🟢 **Completed** |
-| **Phase 3** | **Core API & Architecture** (v0.2) | Standardized API response format, global error middleware, modular CRUD pattern | 🟡 **In Progress** |
-| **Phase 4** | **Production Rigor & Docs** (v0.3) | Integration HTTP test suite, "how to strip code" guide, CI/CD & Deployment config | ⚪ **Planned** |
-| **Phase 5** | **Frontend Integration** (v0.4) | Optional lightweight GUI layer (SolidJS or React) | ⚪ **Planned** |
+| **Phase 1** | **Foundation & Testing** | Core structure, strict Zod env parsing, global `AppError` handler, Vitest harness | 🟢 **Completed** |
+| **Phase 2** | **Auth & Deploy (v0.1)** | JWT Auth module (Register/Login), bcrypt hashing, Docker & PaaS deployment docs (`docs/deploy.md`) | 🟢 **Completed** |
+| **Phase 3** | **Database & ORM (v0.2)** | PostgreSQL integration via Docker Compose, Drizzle ORM schemas & migrations, DB-backed Auth | 🟡 **In Progress** |
+| **Phase 4** | **Security & Observability (v0.3)** | Helmet security headers, CORS, rate limiting, structured logging (Pino), refresh token rotation | ⚪ **Planned** |
+| **Phase 5** | **CI/CD & DX (v0.4)** | GitHub Actions pipeline, pre-commit hooks (Husky), OpenAPI/Swagger spec generation | ⚪ **Planned** |
 
 ---
 
@@ -57,13 +65,13 @@ Most Node.js boilerplates suffer from two extremes: they are either heavily bloa
 Get your environment up and running in less than 2 minutes.
 
 ### 1. Prerequisites
-Ensure you have **Node.js 20+** and **npm** installed on your machine.
+Ensure you have **Node.js 20+**, **npm**, and **Docker Desktop** installed on your machine.
 
 ### 2. Setup Project
 
 ```bash
 # Clone the repository
-git clone [https://github.com/skanlator/nodestar/tree/main](https://github.com/skanlator/nodestar/tree/main)
+git clone [https://github.com/skanlator/nodestar.git](https://github.com/skanlator/nodestar.git)
 cd nodestar
 
 # Install dependencies
@@ -71,16 +79,23 @@ npm install
 
 # Configure environment variables
 cp .env.example .env
+
+# Start PostgreSQL container
+docker compose up -d
 ```
+
 ---
 
-### 3. Development Commands
+## 🛠️ Development Commands
 
 | Command | Action |
 | --- | --- |
 | `npm run dev` | Start development server with hot-reloading |
 | `npm test` | Run the Vitest test suite once |
 | `npm run test:watch` | Run tests in interactive watch mode |
+| `npm run db:generate` | Generate SQL migration files with Drizzle Kit |
+| `npm run db:migrate` | Apply database migrations to PostgreSQL |
+| `npm run db:studio` | Open Drizzle Studio database GUI |
 | `npm run build` | Build the project for production |
 | `npm start` | Run the compiled production build |
 
@@ -89,7 +104,9 @@ cp .env.example .env
 ## 🤝 How to Contribute
 Contributions, issues, and feature requests are welcome!
 
-As the project is currently in Phase 1, the priority is keeping the core footprint minimal and decoupled. If you find a bug or have suggestions for improving test execution speed or architecture, feel free to open an issue or start a discussion.
+If you find a bug or have suggestions for improving test execution speed or architecture, feel free to open an issue or start a discussion.
+
+---
 
 ## 📄 License
 MIT
@@ -101,7 +118,7 @@ MIT
 ```json
 {
   "name": "nodestar",
-  "version": "0.1.0",
+  "version": "0.2.0-dev",
   "description": "A modular, back-to-basics Node.js + Express starter built with tests and docs.",
   "main": "src/index.ts",
   "type": "module",
@@ -110,18 +127,28 @@ MIT
     "build": "vite build",
     "start": "node dist/index.js",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "dotenv": "^16.4.5",
+    "drizzle-orm": "^0.30.0",
     "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "postgres": "^3.4.4",
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
     "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.6",
     "@types/node": "^20.12.12",
-    "supertest": "^7.0.0",
     "@types/supertest": "^6.0.2",
+    "drizzle-kit": "^0.20.14",
+    "supertest": "^7.0.0",
     "tsx": "^4.10.5",
     "typescript": "^5.4.5",
     "vite": "^5.2.11",
