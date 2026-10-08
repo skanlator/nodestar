@@ -71,7 +71,9 @@ Ensure you have **Node.js 20+**, **npm**, and **Docker Desktop** installed on yo
 
 ```bash
 # Clone the repository
-git clone [https://github.com/skanlator/nodestar.git](https://github.com/skanlator/nodestar.git)
+git clone https://github.com/skanlator/nodestar.git
+
+# Navigate into the project
 cd nodestar
 
 # Install dependencies
