@@ -1,68 +1,76 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { env } from '../../config/env.ts';
+import { eq } from 'drizzle-orm';
+import { db } from '../../shared/db/index.ts';
+import { users } from '../../shared/db/schema/users.ts';
 import { AppError } from '../../shared/errors/app-error.ts';
-import { RegisterDTO, LoginDTO } from './auth.schema.ts';
-import { AuthResponse, UserPayload } from './auth.types.ts';
-
-// In-memory user store for boilerplate testing (ready to replace with ORM/DB)
-const usersDb = new Map<string, { id: string; email: string; name?: string; passwordHash: string }>();
+import { env } from '../../config/env.ts';
+import type { LoginInput, RegisterInput } from './auth.schema.ts';
 
 export class AuthService {
-  static async register(dto: RegisterDTO): Promise<AuthResponse> {
-    const existingUser = Array.from(usersDb.values()).find((user) => user.email === dto.email);
+  static async register(input: RegisterInput) {
+    // 1. Verificar si el email ya existe en la base de datos
+    const [existingUser] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, input.email))
+      .limit(1);
+
     if (existingUser) {
-      throw new AppError(400, 'User with this email already exists');
+      throw new AppError('Email already registered', 409);
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash(dto.password, salt);
+    // 2. Hashear la contraseña
+    const passwordHash = await bcrypt.hash(input.password, 10);
 
-    const newUser = {
-      id: crypto.randomUUID(),
-      email: dto.email,
-      name: dto.name,
-      passwordHash,
-    };
+    // 3. Insertar nuevo usuario en PostgreSQL
+    const [newUser] = await db
+      .insert(users)
+      .values({
+        email: input.email,
+        passwordHash,
+        name: input.name,
+      })
+      .returning();
 
-    usersDb.set(newUser.id, newUser);
-
-    const userPayload: UserPayload = {
-      id: newUser.id,
-      email: newUser.email,
-      name: newUser.name,
-    };
-
-    const token = this.generateToken(userPayload);
-
-    return { user: userPayload, token };
-  }
-
-  static async login(dto: LoginDTO): Promise<AuthResponse> {
-    const user = Array.from(usersDb.values()).find((u) => u.email === dto.email);
-    if (!user) {
-      throw new AppError(401, 'Invalid email or password');
-    }
-
-    const isPasswordValid = await bcrypt.compare(dto.password, user.passwordHash);
-    if (!isPasswordValid) {
-      throw new AppError(401, 'Invalid email or password');
-    }
-
-    const userPayload: UserPayload = {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-    };
-
-    const token = this.generateToken(userPayload);
-
-    return { user: userPayload, token };
-  }
-
-  private static generateToken(payload: UserPayload): string {
-    return jwt.sign(payload, env.JWT_SECRET, {
+    // 4. Generar token JWT
+    const token = jwt.sign({ sub: newUser.id }, env.JWT_SECRET, {
       expiresIn: env.JWT_EXPIRES_IN as jwt.SignOptions['expiresIn'],
     });
+
+    // 5. Excluir passwordHash de la respuesta
+    const { passwordHash: _, ...userWithoutPassword } = newUser;
+
+    return { user: userWithoutPassword, token };
+  }
+
+  static async login(input: LoginInput) {
+    // 1. Buscar usuario por email
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, input.email))
+      .limit(1);
+
+    if (!user) {
+      throw new AppError('Invalid email or password', 401);
+    }
+
+    // 2. Validar hash de la contraseña
+    const isValidPassword = await bcrypt.compare(input.password, user.passwordHash);
+
+    if (!isValidPassword) {
+      throw new AppError('Invalid email or password', 401);
+    }
+
+    // 3. Generar token JWT
+    const token = jwt.sign({ sub: user.id }, env.JWT_SECRET, {
+      expiresIn: env.JWT_EXPIRES_IN as jwt.SignOptions['expiresIn'],
+    });
+
+    // 4. Excluir passwordHash de la respuesta
+    const { passwordHash: _, ...userWithoutPassword } = user;
+
+    return { user: userWithoutPassword, token };
   }
 }
