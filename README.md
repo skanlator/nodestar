@@ -1,6 +1,6 @@
 # `README.md`
 
-# nodestar (v0.1) Node starter kit
+# nodestar (v0.2) Node starter kit
 
 > A modular, back-to-basics Node.js + Express starter engineered for production rigor: zero bloat, fully decoupled modules, and lightning-fast testing out of the box.
 
@@ -54,8 +54,8 @@ Most Node.js boilerplates suffer from two extremes: they are either heavily bloa
 | :--- | :--- | :--- | :---: |
 | **Phase 1** | **Foundation & Testing** | Core structure, strict Zod env parsing, global `AppError` handler, Vitest harness | 🟢 **Completed** |
 | **Phase 2** | **Auth & Deploy (v0.1)** | JWT Auth module (Register/Login), bcrypt hashing, Docker & PaaS deployment docs (`docs/deploy.md`) | 🟢 **Completed** |
-| **Phase 3** | **Database & ORM (v0.2)** | PostgreSQL integration via Docker Compose, Drizzle ORM schemas & migrations, DB-backed Auth | 🟡 **In Progress** |
-| **Phase 4** | **Security & Observability (v0.3)** | Helmet security headers, CORS, rate limiting, structured logging (Pino), refresh token rotation | ⚪ **Planned** |
+| **Phase 3** | **Database & ORM (v0.2)** | PostgreSQL integration via Docker Compose, Drizzle ORM schemas & migrations, DB-backed Auth | 🟢 **Completed** |
+| **Phase 4** | **Security & Observability (v0.3)** | Helmet security headers, CORS, rate limiting, structured logging (Pino), refresh token rotation | 🟡 **In Progress** |
 | **Phase 5** | **CI/CD & DX (v0.4)** | GitHub Actions pipeline, pre-commit hooks (Husky), OpenAPI/Swagger spec generation | ⚪ **Planned** |
 
 ---
