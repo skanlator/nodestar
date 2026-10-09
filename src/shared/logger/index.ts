@@ -1,8 +1,9 @@
 import pino from 'pino';
 import { env } from '../../config/env.ts';
 
+// Structured logger configured with Pino
 export const logger = pino({
-  level: env.LOG_LEVEL || 'info',
+  level: env.LOG_LEVEL,
   transport:
     env.NODE_ENV === 'development'
       ? {
