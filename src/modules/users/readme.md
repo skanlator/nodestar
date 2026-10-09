@@ -17,7 +17,7 @@ src/modules/users/
 
 ---
 
-### Step 1: Define Validation Schemas (`users.schema.ts`)
+### Step 1: Define Validation Schemas (`./users.schema.ts`)
 
 ```typescript
 import { z } from 'zod';
@@ -32,7 +32,7 @@ export const getUserByIdSchema = z.object({
 export type GetUserByIdInput = z.infer<typeof getUserByIdSchema>;
 ```
 
-### Step 2: Implement Business Logic (`users.service.ts`)
+### Step 2: Implement Business Logic (`./users.service.ts`)
 
 ```typescript
 import { eq } from 'drizzle-orm';
@@ -62,7 +62,7 @@ export class UsersService {
 }
 ```
 
-### Step 3: Define Express Endpoints (`users.routes.ts`)
+### Step 3: Define Express Endpoints (`./users.routes.ts`)
 
 ```typescript
 import { Router } from 'express';
