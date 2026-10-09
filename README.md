@@ -1,4 +1,4 @@
-# nodestar
+# nodestar Node starter kit
 
 A production-ready, modular Node.js API boilerplate built with **Express**, **TypeScript**, **Drizzle ORM**, **Zod**, and **Pino**. Designed for high security, observability, type safety, and scalability out of the box.
 
