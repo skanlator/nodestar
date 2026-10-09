@@ -1,6 +1,6 @@
 ## Example Architecture Guide: Adding a Products Module
 
-The walkthrough below demonstrates how to add a completely new **Products Module** (`./src/modules/products/`) to `nodestar`.
+The walkthrough below demonstrates how to add a completely new **Products Module** (`src/modules/products/`) to `nodestar`.
 
 ---
 
@@ -15,7 +15,7 @@ src/modules/products/
 
 ---
 
-### Step 1: Define Validation Schemas (`products.schema.ts`)
+### Step 1: Define Validation Schemas (`./products.schema.ts`)
 
 ```typescript
 import { z } from 'zod';
