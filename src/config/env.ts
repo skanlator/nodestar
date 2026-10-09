@@ -9,6 +9,8 @@ const envSchema = z.object({
   DATABASE_URL: z.string().url('DATABASE_URL must be a valid connection URL'),
   JWT_SECRET: z.string().min(1, 'JWT_SECRET is required'),
   JWT_EXPIRES_IN: z.string().default('1d'),
+  LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
+  CORS_ORIGIN: z.string().default('*')
 });
 
 const _env = envSchema.safeParse(process.env);
