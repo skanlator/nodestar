@@ -6,24 +6,25 @@ import { env } from './config/env.ts';
 import { logger } from './shared/logger/index.ts';
 import { globalRateLimiter } from './shared/middlewares/rate-limiter.ts';
 import { errorHandler } from './shared/middlewares/error-handler.ts';
+import { authRouter } from './modules/auth/auth.routes.ts';
 
 export const app = express();
 
-// 1. Logging HTTP
+// 1. HTTP request logging
 app.use(pinoHttp({ logger }));
 
-// 2. Cabeceras de seguridad e integración CORS
+// 2. Security headers & CORS policy
 app.use(helmet());
 app.use(cors({ origin: env.CORS_ORIGIN }));
 
-// 3. Rate Limiting Global
+// 3. Global rate limiting
 app.use(globalRateLimiter);
 
 // 4. Body parsing
 app.use(express.json());
 
-// 5. Rutas
-// app.use('/api', apiRouter);
+// 5. Domain Routes
+app.use('/api/auth', authRouter);
 
-// 6. Manejo global de errores
+// 6. Global error handling middleware
 app.use(errorHandler);
