@@ -1,6 +1,6 @@
 ## Example Architecture Guide: Adding a Products Module
 
-The walkthrough below demonstrates how to add a completely new **Products Module** (`src/modules/products/`) to `nodestar`.
+The walkthrough below demonstrates how to add a completely new **Products Module** (`./src/modules/products/`) to `nodestar`.
 
 ---
 
@@ -32,7 +32,7 @@ export const createProductSchema = z.object({
 export type CreateProductInput = z.infer<typeof createProductSchema>;
 ```
 
-### Step 2: Implement Business Logic (`products.service.ts`)
+### Step 2: Implement Business Logic (`./products.service.ts`)
 
 ```typescript
 import { eq } from 'drizzle-orm';
@@ -71,7 +71,7 @@ export class ProductsService {
 }
 ```
 
-### Step 3: Define Express Endpoints (`products.routes.ts`)
+### Step 3: Define Express Endpoints (`./products.routes.ts`)
 
 ```typescript
 import { Router } from 'express';
