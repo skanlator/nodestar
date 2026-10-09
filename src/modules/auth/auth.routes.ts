@@ -4,6 +4,7 @@ import { registerSchema, loginSchema, refreshTokenSchema } from './auth.schema.t
 import { validateRequest } from '../../shared/middlewares/validate-request.ts';
 import { authRateLimiter } from '../../shared/middlewares/rate-limiter.ts';
 import { authenticate } from '../../shared/middlewares/authenticate.ts';
+import { authorize } from '../../shared/middlewares/authorize.ts';
 
 export const authRouter = Router();
 
@@ -75,7 +76,7 @@ authRouter.post(
 /**
  * @route   POST /api/auth/logout
  * @desc    Revoke current refresh token
- * @access  Private
+ * @access  Private (Authenticated)
  */
 authRouter.post('/logout', authenticate, async (req, res, next) => {
   try {
@@ -92,7 +93,7 @@ authRouter.post('/logout', authenticate, async (req, res, next) => {
 /**
  * @route   GET /api/auth/me
  * @desc    Get profile of currently authenticated user
- * @access  Private
+ * @access  Private (Authenticated)
  */
 authRouter.get('/me', authenticate, async (req, res, next) => {
   try {
@@ -104,3 +105,24 @@ authRouter.get('/me', authenticate, async (req, res, next) => {
     next(error);
   }
 });
+
+/**
+ * @route   GET /api/auth/admin/dashboard
+ * @desc    Admin panel endpoint protected by RBAC
+ * @access  Private (Admin role only)
+ */
+authRouter.get(
+  '/admin/dashboard',
+  authenticate,
+  authorize('admin'),
+  async (_req, res, next) => {
+    try {
+      res.status(200).json({
+        status: 'success',
+        message: 'Welcome to the Admin Panel',
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
