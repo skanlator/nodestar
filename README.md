@@ -84,6 +84,12 @@ cp .env.example .env
 
 # Start PostgreSQL container
 docker compose up -d
+
+# Production dependencies
+npm install helmet cors express-rate-limit pino pino-http
+
+# Development dependencies and types
+npm install -D @types/cors pino-pretty
 ```
 
 ---
