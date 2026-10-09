@@ -20,7 +20,6 @@ describe('Application Core & Infrastructure Middleware Tests', () => {
     it('should include security headers set by Helmet', async () => {
       const response = await request(app).get('/health');
 
-      // Helmet default security headers
       expect(response.headers['x-dns-prefetch-control']).toBe('off');
       expect(response.headers['x-frame-options']).toBe('SAMEORIGIN');
       expect(response.headers['strict-transport-security']).toBeDefined();
@@ -38,13 +37,34 @@ describe('Application Core & Infrastructure Middleware Tests', () => {
 
   describe('Rate Limiting Middleware', () => {
     it('should include standard rate limit headers on rate-limited endpoints', async () => {
-      // Testing an endpoint protected by globalRateLimiter
       const response = await request(app).get('/api/auth/non-existent-route');
 
-      // Standard headers enabled via express-rate-limit standardHeaders: true
       expect(response.headers['ratelimit-limit']).toBeDefined();
       expect(response.headers['ratelimit-remaining']).toBeDefined();
       expect(response.headers['ratelimit-reset']).toBeDefined();
+    });
+
+    it('should return 429 Too Many Requests when rate limit threshold is exceeded', async () => {
+      // authRateLimiter allows a maximum of 10 requests per 15-minute window
+      const initialRequests = Array.from({ length: 10 }, () =>
+        request(app)
+          .post('/api/auth/login')
+          .send({ email: 'test@example.com', password: 'Password123!' })
+      );
+
+      // Execute 10 consecutive requests to consume the allowance
+      await Promise.all(initialRequests);
+
+      // The 11th request triggers HTTP 429 Too Many Requests
+      const exceededResponse = await request(app)
+        .post('/api/auth/login')
+        .send({ email: 'test@example.com', password: 'Password123!' });
+
+      expect(exceededResponse.status).toBe(429);
+      expect(exceededResponse.body).toHaveProperty(
+        'message',
+        'Too many authentication attempts, please try again later.'
+      );
     });
   });
 });
