@@ -1,86 +1,164 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import request from 'supertest';
-import { db } from '../../shared/db/index.ts';
-import { users } from '../../shared/db/schema/users.ts';
 import { app } from '../../app.ts';
+import { db } from '../../shared/db/index.ts';
+import { users } from '../../shared/db/users.ts';
+import { PasswordService } from '../../shared/utils/password.ts';
 
-describe('Auth Module Integration Tests (PostgreSQL)', () => {
-  // Limpieza de la base de datos antes de cada test para garantizar aislamiento total
+describe('Auth Module Integration Tests (/api/auth)', () => {
+  const testUser = {
+    name: 'John Doe',
+    email: 'john.doe@example.com',
+    password: 'StrongP@ssword123!',
+  };
+
+  // Clean up users table before each test
   beforeEach(async () => {
     await db.delete(users);
   });
 
   describe('POST /api/auth/register', () => {
-    it('debería registrar un nuevo usuario en PostgreSQL y devolver token JWT', async () => {
-      const payload = {
-        email: 'dev@nodestar.io',
-        password: 'Password123!',
-        name: 'Nodestar Developer',
-      };
-
+    it('should register a new user successfully and return 201', async () => {
       const response = await request(app)
         .post('/api/auth/register')
-        .send(payload);
+        .send(testUser);
 
       expect(response.status).toBe(201);
-      expect(response.body).toHaveProperty('token');
-      expect(response.body.user).toMatchObject({
-        email: payload.email,
-        name: payload.name,
-      });
-      expect(response.body.user).not.toHaveProperty('passwordHash');
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.user).toBeDefined();
+      expect(response.body.data.user.email).toBe(testUser.email.toLowerCase());
+      expect(response.body.data.user.name).toBe(testUser.name);
+      expect(response.body.data.user.passwordHash).toBeUndefined(); // Sensitive field omitted
     });
 
-    it('debería retornar conflicto (409) cuando el email ya existe en la base de datos', async () => {
-      const payload = {
-        email: 'duplicate@nodestar.io',
-        password: 'Password123!',
-      };
+    it('should return 409 Conflict if email is already registered', async () => {
+      // Register initial user
+      await request(app).post('/api/auth/register').send(testUser);
 
-      // Primer registro
-      await request(app).post('/api/auth/register').send(payload);
-
-      // Intento de registro duplicado
+      // Attempt duplicate registration
       const response = await request(app)
         .post('/api/auth/register')
-        .send(payload);
+        .send(testUser);
 
       expect(response.status).toBe(409);
       expect(response.body.message).toMatch(/already registered/i);
     });
+
+    it('should return validation error if password does not meet complexity rules', async () => {
+      const weakUser = {
+        ...testUser,
+        password: '123', // Fails min length & complexity
+      };
+
+      const response = await request(app)
+        .post('/api/auth/register')
+        .send(weakUser);
+
+      expect(response.status).toBe(400);
+    });
   });
 
   describe('POST /api/auth/login', () => {
-    it('debería autenticar correctamente un usuario existente en PostgreSQL', async () => {
-      const credentials = {
-        email: 'user@nodestar.io',
-        password: 'SecurePassword123!',
-      };
-
-      // Crear usuario previo
-      await request(app).post('/api/auth/register').send(credentials);
-
-      // Probar login
-      const response = await request(app)
-        .post('/api/auth/login')
-        .send(credentials);
-
-      expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty('token');
-      expect(response.body.user.email).toBe(credentials.email);
-      expect(response.body.user).not.toHaveProperty('passwordHash');
+    beforeEach(async () => {
+      // Pre-register user directly or via API
+      await request(app).post('/api/auth/register').send(testUser);
     });
 
-    it('debería rechazar credenciales inválidas con estado 401', async () => {
-      const response = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: 'nonexistent@nodestar.io',
-          password: 'WrongPassword!',
-        });
+    it('should authenticate user and return access & refresh tokens', async () => {
+      const response = await request(app).post('/api/auth/login').send({
+        email: testUser.email,
+        password: testUser.password,
+      });
+
+      expect(response.status).toBe(200);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.tokens.accessToken).toBeDefined();
+      expect(response.body.data.tokens.refreshToken).toBeDefined();
+      expect(response.body.data.user.email).toBe(testUser.email.toLowerCase());
+    });
+
+    it('should return 401 Unauthorized for invalid password', async () => {
+      const response = await request(app).post('/api/auth/login').send({
+        email: testUser.email,
+        password: 'WrongPassword123!',
+      });
 
       expect(response.status).toBe(401);
       expect(response.body.message).toMatch(/invalid email or password/i);
+    });
+  });
+
+  describe('POST /api/auth/refresh', () => {
+    it('should issue new access & refresh tokens when given a valid refresh token', async () => {
+      await request(app).post('/api/auth/register').send(testUser);
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: testUser.email,
+        password: testUser.password,
+      });
+
+      const { refreshToken } = loginRes.body.data.tokens;
+
+      const refreshRes = await request(app)
+        .post('/api/auth/refresh')
+        .send({ refreshToken });
+
+      expect(refreshRes.status).toBe(200);
+      expect(refreshRes.body.data.tokens.accessToken).toBeDefined();
+      expect(refreshRes.body.data.tokens.refreshToken).toBeDefined();
+    });
+
+    it('should return 401 Unauthorized for an invalid or revoked refresh token', async () => {
+      const response = await request(app)
+        .post('/api/auth/refresh')
+        .send({ refreshToken: 'invalid.jwt.token' });
+
+      expect(response.status).toBe(401);
+    });
+  });
+
+  describe('Protected Routes (GET /api/auth/me & POST /api/auth/logout)', () => {
+    let accessToken: string;
+    let refreshToken: string;
+
+    beforeEach(async () => {
+      await request(app).post('/api/auth/register').send(testUser);
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: testUser.email,
+        password: testUser.password,
+      });
+
+      accessToken = loginRes.body.data.tokens.accessToken;
+      refreshToken = loginRes.body.data.tokens.refreshToken;
+    });
+
+    it('GET /api/auth/me - should return profile for authenticated user', async () => {
+      const response = await request(app)
+        .get('/api/auth/me')
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.user.email).toBe(testUser.email.toLowerCase());
+    });
+
+    it('GET /api/auth/me - should return 401 if Authorization header is missing', async () => {
+      const response = await request(app).get('/api/auth/me');
+
+      expect(response.status).toBe(401);
+    });
+
+    it('POST /api/auth/logout - should revoke refresh token', async () => {
+      const logoutRes = await request(app)
+        .post('/api/auth/logout')
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(logoutRes.status).toBe(200);
+
+      // Attempting to refresh after logout should fail
+      const refreshRes = await request(app)
+        .post('/api/auth/refresh')
+        .send({ refreshToken });
+
+      expect(refreshRes.status).toBe(401);
     });
   });
 });
