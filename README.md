@@ -72,7 +72,7 @@ All environment variables are parsed and validated on application startup in `sr
 
 ```bash
 # Clone the repository
-git clone [https://github.com/your-username/nodestar.git](https://github.com/your-username/nodestar.git)
+git clone [https://github.com/skanlator/nodestar/tree/main]
 cd nodestar
 
 # Install dependencies
