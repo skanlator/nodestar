@@ -126,3 +126,5 @@ authRouter.get(
     }
   }
 );
+
+export const authRoutes = authRouter;
