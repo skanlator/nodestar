@@ -1,7 +1,7 @@
 import express, { Express, Request, Response } from 'express';
 import { env } from './config/env.ts';
 import { errorHandler } from './shared/middlewares/error.middleware.ts';
-import authRoutes from './modules/auth/auth.routes.ts';
+import { authRoutes } from './modules/auth/auth.routes.ts';
 
 const app: Express = express();
 
