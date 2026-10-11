@@ -23,29 +23,43 @@ A production-ready, modular Node.js API boilerplate built with **Express**, **Ty
 
 ## 📁 Project Structure
 
+The project follows a modular and scalable architecture designed for maintainability and clean separation of concerns:
+
 ```text
 nodestar/
+├── drizzle/                  # Generated SQL migration files (Drizzle Kit)
 ├── src/
-│   ├── config/
-│   │   └── env.ts                     # Validated Zod environment configuration
-│   ├── shared/
-│   │   ├── db/                        # Drizzle ORM database connection & schemas
-│   │   ├── errors/                    # AppError class & custom error types
-│   │   ├── logger/                    # Pino structured logger instance
-│   │   └── middlewares/
-│   │       ├── error-handler.ts       # Global error processing middleware
-│   │       └── rate-limiter.ts        # Global and auth-specific rate limiters
 │   ├── modules/
-│   │   └── auth/                      # Domain module example (schema, service, routes)
-│   │       ├── auth.schema.ts
-│   │       ├── auth.service.ts
-│   │       └── auth.routes.ts
-│   ├── app.ts                         # Core Express app pipeline assembly
-│   ├── app.test.ts                    # Core infrastructure & security integration tests
-│   └── server.ts                      # Server initialization & entrypoint
-├── .env.example
-├── vitest.config.ts
-└── package.json
+│   │   └── auth/             # Authentication & User Management Module
+│   │       ├── auth.controller.ts # Request handlers for register, login, and profile
+│   │       ├── auth.routes.ts     # Route definitions (/register, /login, /me)
+│   │       ├── auth.schema.ts     # Zod validation schemas with strong password rules
+│   │       ├── auth.service.ts    # Business logic, security, and token handling
+│   │       ├── auth.test.ts       # Test suite for authentication flows
+│   │       └── auth.types.ts      # TypeScript interfaces (UserPayload, AuthResponse)
+│   ├── shared/
+│   │   ├── db/
+│   │   │   ├── schema/       # Database table schemas and relations
+│   │   │   │   ├── index.ts  # Central schema exports
+│   │   │   │   └── users.ts  # Users table definition
+│   │   │   ├── index.ts      # Drizzle database client initialization & connection
+│   │   │   └── migrate.ts    # Database migration execution script
+│   │   ├── logger/           # Pino structured logging configuration
+│   │   │   └── index.ts      # Logger instance setup
+│   │   ├── middlewares/      # Reusable Express middlewares
+│   │   │   ├── auth.middleware.ts     # JWT verification middleware for protected routes
+│   │   │   └── validate-request.ts    # Zod validation middleware wrapper
+│   │   └── utils/            # Shared helper functions & services
+│   │       └── jwt.ts        # JWT generation, verification & token utilities
+│   ├── types/                # Global TypeScript type definitions
+│   │   └── express.d.ts      # Express Request extensions (e.g., req.user payload)
+│   └── index.ts              # Application entry point, Express app & server bootstrap
+├── .env                      # Local environment variables (git-ignored)
+├── .env.example              # Environment variables template
+├── drizzle.config.ts         # Drizzle ORM configuration and SSL settings
+├── package.json              # Project dependencies, scripts, and metadata
+├── tsconfig.json             # TypeScript compiler options
+└── README.md                 # Project documentation
 ```
 
 ---
