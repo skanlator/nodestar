@@ -14,7 +14,6 @@ export const errorHandler = (
     });
   }
 
-  // Log de errores no controlados para depuración
   console.error('[Unhandled Error]:', err);
 
   return res.status(500).json({
