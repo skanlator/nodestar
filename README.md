@@ -131,6 +131,7 @@ To restore the correct permissions back to your user profile, run the following 
 sudo chown -R $USER:$USER .
 
 ```
+After running this command, your user will own all project files again, and your tests or development commands will run smoothly without any permission blocks.
 
 ```bash
 # Run integration test suite
