@@ -80,7 +80,7 @@ authRouter.post(
  */
 authRouter.post('/logout', authenticate, async (req, res, next) => {
   try {
-    await AuthService.logout(req.user.sub);
+    await AuthService.logout(req.user!.sub);
     res.status(200).json({
       status: 'success',
       message: 'Logged out successfully',
@@ -99,7 +99,7 @@ authRouter.get('/me', authenticate, async (req, res, next) => {
   try {
     res.status(200).json({
       status: 'success',
-      data: { user: req.user },
+      data: { user: req.user! },
     });
   } catch (error) {
     next(error);
@@ -128,3 +128,4 @@ authRouter.get(
 );
 
 export const authRoutes = authRouter;
+
