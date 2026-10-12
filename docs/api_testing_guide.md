@@ -1,5 +1,4 @@
 
-```markdown
 # API Testing Guide
 
 This document outlines how to test the core authentication and user management endpoints of the **nodestar** application using `curl`.
