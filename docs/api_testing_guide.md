@@ -1,6 +1,3 @@
-¡Tienes toda la razón! Falta por incluir la ruta de renovación del token (`/auth/refresh`), que es una pieza clave dentro del flujo de autenticación que hemos estado probando.
-
-Aquí tienes el archivo Markdown completo y actualizado con la sección de **Refresh Token** añadida en su lugar correspondiente:
 
 ```markdown
 # API Testing Guide
