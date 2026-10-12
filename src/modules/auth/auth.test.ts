@@ -1,9 +1,8 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import request from 'supertest';
-import { app } from '../../app.ts';
-import { db } from '../../shared/db/index.ts';
-import { users } from '../../shared/db/users.ts';
-import { PasswordService } from '../../shared/utils/password.ts';
+import { app } from '../../app';
+import { db } from '../../shared/db/index';
+import { users } from '../../shared/db/users';
 
 describe('Auth Module Integration Tests (/api/auth)', () => {
   const testUser = {
@@ -21,6 +20,7 @@ describe('Auth Module Integration Tests (/api/auth)', () => {
     it('should register a new user successfully and return 201', async () => {
       const response = await request(app)
         .post('/api/auth/register')
+        .set('x-bypass-rate-limit', 'true')
         .send(testUser);
 
       expect(response.status).toBe(201);
@@ -33,11 +33,15 @@ describe('Auth Module Integration Tests (/api/auth)', () => {
 
     it('should return 409 Conflict if email is already registered', async () => {
       // Register initial user
-      await request(app).post('/api/auth/register').send(testUser);
+      await request(app)
+        .post('/api/auth/register')
+        .set('x-bypass-rate-limit', 'true')
+        .send(testUser);
 
       // Attempt duplicate registration
       const response = await request(app)
         .post('/api/auth/register')
+        .set('x-bypass-rate-limit', 'true')
         .send(testUser);
 
       expect(response.status).toBe(409);
@@ -52,6 +56,7 @@ describe('Auth Module Integration Tests (/api/auth)', () => {
 
       const response = await request(app)
         .post('/api/auth/register')
+        .set('x-bypass-rate-limit', 'true')
         .send(weakUser);
 
       expect(response.status).toBe(400);
@@ -60,15 +65,21 @@ describe('Auth Module Integration Tests (/api/auth)', () => {
 
   describe('POST /api/auth/login', () => {
     beforeEach(async () => {
-      // Pre-register user directly or via API
-      await request(app).post('/api/auth/register').send(testUser);
+      // Pre-register user via API
+      await request(app)
+        .post('/api/auth/register')
+        .set('x-bypass-rate-limit', 'true')
+        .send(testUser);
     });
 
     it('should authenticate user and return access & refresh tokens', async () => {
-      const response = await request(app).post('/api/auth/login').send({
-        email: testUser.email,
-        password: testUser.password,
-      });
+      const response = await request(app)
+        .post('/api/auth/login')
+        .set('x-bypass-rate-limit', 'true')
+        .send({
+          email: testUser.email,
+          password: testUser.password,
+        });
 
       expect(response.status).toBe(200);
       expect(response.body.status).toBe('success');
@@ -78,10 +89,13 @@ describe('Auth Module Integration Tests (/api/auth)', () => {
     });
 
     it('should return 401 Unauthorized for invalid password', async () => {
-      const response = await request(app).post('/api/auth/login').send({
-        email: testUser.email,
-        password: 'WrongPassword123!',
-      });
+      const response = await request(app)
+        .post('/api/auth/login')
+        .set('x-bypass-rate-limit', 'true')
+        .send({
+          email: testUser.email,
+          password: 'WrongPassword123!',
+        });
 
       expect(response.status).toBe(401);
       expect(response.body.message).toMatch(/invalid email or password/i);
@@ -90,16 +104,23 @@ describe('Auth Module Integration Tests (/api/auth)', () => {
 
   describe('POST /api/auth/refresh', () => {
     it('should issue new access & refresh tokens when given a valid refresh token', async () => {
-      await request(app).post('/api/auth/register').send(testUser);
-      const loginRes = await request(app).post('/api/auth/login').send({
-        email: testUser.email,
-        password: testUser.password,
-      });
+      await request(app)
+        .post('/api/auth/register')
+        .set('x-bypass-rate-limit', 'true')
+        .send(testUser);
+      const loginRes = await request(app)
+        .post('/api/auth/login')
+        .set('x-bypass-rate-limit', 'true')
+        .send({
+          email: testUser.email,
+          password: testUser.password,
+        });
 
       const { refreshToken } = loginRes.body.data.tokens;
 
       const refreshRes = await request(app)
         .post('/api/auth/refresh')
+        .set('x-bypass-rate-limit', 'true')
         .send({ refreshToken });
 
       expect(refreshRes.status).toBe(200);
@@ -110,6 +131,7 @@ describe('Auth Module Integration Tests (/api/auth)', () => {
     it('should return 401 Unauthorized for an invalid or revoked refresh token', async () => {
       const response = await request(app)
         .post('/api/auth/refresh')
+        .set('x-bypass-rate-limit', 'true')
         .send({ refreshToken: 'invalid.jwt.token' });
 
       expect(response.status).toBe(401);
@@ -121,11 +143,17 @@ describe('Auth Module Integration Tests (/api/auth)', () => {
     let refreshToken: string;
 
     beforeEach(async () => {
-      await request(app).post('/api/auth/register').send(testUser);
-      const loginRes = await request(app).post('/api/auth/login').send({
-        email: testUser.email,
-        password: testUser.password,
-      });
+      await request(app)
+        .post('/api/auth/register')
+        .set('x-bypass-rate-limit', 'true')
+        .send(testUser);
+      const loginRes = await request(app)
+        .post('/api/auth/login')
+        .set('x-bypass-rate-limit', 'true')
+        .send({
+          email: testUser.email,
+          password: testUser.password,
+        });
 
       accessToken = loginRes.body.data.tokens.accessToken;
       refreshToken = loginRes.body.data.tokens.refreshToken;
@@ -134,14 +162,17 @@ describe('Auth Module Integration Tests (/api/auth)', () => {
     it('GET /api/auth/me - should return profile for authenticated user', async () => {
       const response = await request(app)
         .get('/api/auth/me')
-        .set('Authorization', `Bearer ${accessToken}`);
+        .set('Authorization', `Bearer ${accessToken}`)
+        .set('x-bypass-rate-limit', 'true');
 
       expect(response.status).toBe(200);
       expect(response.body.data.user.email).toBe(testUser.email.toLowerCase());
     });
 
     it('GET /api/auth/me - should return 401 if Authorization header is missing', async () => {
-      const response = await request(app).get('/api/auth/me');
+      const response = await request(app)
+        .get('/api/auth/me')
+        .set('x-bypass-rate-limit', 'true');
 
       expect(response.status).toBe(401);
     });
@@ -149,13 +180,15 @@ describe('Auth Module Integration Tests (/api/auth)', () => {
     it('POST /api/auth/logout - should revoke refresh token', async () => {
       const logoutRes = await request(app)
         .post('/api/auth/logout')
-        .set('Authorization', `Bearer ${accessToken}`);
+        .set('Authorization', `Bearer ${accessToken}`)
+        .set('x-bypass-rate-limit', 'true');
 
       expect(logoutRes.status).toBe(200);
 
       // Attempting to refresh after logout should fail
       const refreshRes = await request(app)
         .post('/api/auth/refresh')
+        .set('x-bypass-rate-limit', 'true')
         .send({ refreshToken });
 
       expect(refreshRes.status).toBe(401);

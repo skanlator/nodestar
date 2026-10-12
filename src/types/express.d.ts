@@ -1,4 +1,4 @@
-import { JwtPayload } from '../shared/utils/jwt.ts';
+import { JwtPayload } from '../shared/utils/jwt';
 
 declare global {
   namespace Express {
@@ -6,7 +6,7 @@ declare global {
       /**
        * Authenticated user payload attached by the auth middleware
        */
-      user: JwtPayload & { sub: string };
+      user?: JwtPayload & { sub: string };
     }
   }
 }

@@ -1,21 +1,23 @@
 import { eq } from 'drizzle-orm';
-import { db } from '../../shared/db/index.ts';
-import { users } from '../../shared/db/users.ts';
-import { PasswordService } from '../../shared/utils/password.ts';
-import { JwtService } from '../../shared/utils/jwt.ts';
-import { AppError } from '../../shared/errors/app-error.ts';
-import type { RegisterInput, LoginInput, RefreshTokenInput } from './auth.schema.ts';
+import { db } from '../../shared/db/index';
+import { users } from '../../shared/db/users';
+import { PasswordService } from '../../shared/utils/password';
+import { JwtService } from '../../shared/utils/jwt';
+import { AppError } from '../../shared/errors/app-error';
+import type { RegisterInput, LoginInput, RefreshTokenInput } from './auth.schema';
 
 export class AuthService {
   /**
    * Registers a new user, hashes their password, and issues tokens.
    */
   static async register(input: RegisterInput) {
+    const emailLower = input.email.toLowerCase();
+
     // 1. Check if user already exists
     const [existingUser] = await db
       .select()
       .from(users)
-      .where(eq(users.email, input.email))
+      .where(eq(users.email, emailLower))
       .limit(1);
 
     if (existingUser) {
@@ -30,7 +32,7 @@ export class AuthService {
       .insert(users)
       .values({
         name: input.name,
-        email: input.email,
+        email: emailLower,
         passwordHash,
         role: 'user',
       })
@@ -71,11 +73,13 @@ export class AuthService {
    * Authenticates user, verifies password, and issues tokens.
    */
   static async login(input: LoginInput) {
+    const emailLower = input.email.toLowerCase();
+
     // 1. Find user by email
     const [user] = await db
       .select()
       .from(users)
-      .where(eq(users.email, input.email))
+      .where(eq(users.email, emailLower))
       .limit(1);
 
     if (!user) {

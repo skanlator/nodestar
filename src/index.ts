@@ -18,8 +18,8 @@ app.get('/health', (_req: Request, res: Response) => {
   });
 });
 
-// Domain modules
-app.use('/auth', authRoutes);
+// Domain modules (Corregido de '/auth' a '/api/auth' para alinearlo con los tests y curl)
+app.use('/api/auth', authRoutes);
 
 // Global error handling middleware (must be registered last)
 app.use(errorHandler);

@@ -1,16 +1,16 @@
 import { Router } from 'express';
-import { AuthService } from './auth.service.ts';
-import { registerSchema, loginSchema, refreshTokenSchema } from './auth.schema.ts';
-import { validateRequest } from '../../shared/middlewares/validate-request.ts';
-import { authRateLimiter } from '../../shared/middlewares/rate-limiter.ts';
-import { authenticate } from '../../shared/middlewares/authenticate.ts';
-import { authorize } from '../../shared/middlewares/authorize.ts';
+import { AuthService } from './auth.service';
+import { registerSchema, loginSchema, refreshTokenSchema } from './auth.schema';
+import { validateRequest } from '../../shared/middlewares/validate-request';
+import { authRateLimiter } from '../../shared/middlewares/rate-limiter';
+import { authenticate } from '../../shared/middlewares/authenticate';
+import { authorize } from '../../shared/middlewares/authorize';
 
 export const authRouter = Router();
 
 /**
  * @route   POST /api/auth/register
- * @desc    Register a new user account
+ * @desc    Register a new user account and return tokens
  * @access  Public
  */
 authRouter.post(
@@ -19,10 +19,10 @@ authRouter.post(
   validateRequest(registerSchema),
   async (req, res, next) => {
     try {
-      const user = await AuthService.register(req.body);
+      const result = await AuthService.register(req.body);
       res.status(201).json({
         status: 'success',
-        data: { user },
+        data: result,
       });
     } catch (error) {
       next(error);
@@ -62,10 +62,10 @@ authRouter.post(
   validateRequest(refreshTokenSchema),
   async (req, res, next) => {
     try {
-      const tokens = await AuthService.refresh(req.body);
+      const result = await AuthService.refresh(req.body);
       res.status(200).json({
         status: 'success',
-        data: { tokens },
+        data: result,
       });
     } catch (error) {
       next(error);
@@ -80,7 +80,7 @@ authRouter.post(
  */
 authRouter.post('/logout', authenticate, async (req, res, next) => {
   try {
-    await AuthService.logout(req.user!.sub);
+    await AuthService.logout(req.user!.userId);
     res.status(200).json({
       status: 'success',
       message: 'Logged out successfully',
@@ -128,4 +128,3 @@ authRouter.get(
 );
 
 export const authRoutes = authRouter;
-
