@@ -7,7 +7,7 @@ import { env } from './config/env.ts';
 import { logger } from './shared/logger/index.ts';
 import { db } from './shared/db/index.ts';
 import { globalRateLimiter } from './shared/middlewares/rate-limiter.ts';
-import { errorHandler } from './shared/middlewares/error-handler.ts';
+import { errorHandler } from './shared/middlewares/error.middleware.ts';
 import { authRouter } from './modules/auth/auth.routes.ts';
 
 export const app = express();
