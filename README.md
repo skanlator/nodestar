@@ -121,6 +121,17 @@ npm start
 
 ### 5. Running Tests
 
+### Fixing Permissions for Vitest Cache
+
+The `EACCES` error occurs because some directories or files inside your `node_modules` folder were accidentally created with `root` privileges (usually from running a command like `npm install` with `sudo`), which prevents Vitest and Node.js from writing to the `.vite` cache directory.
+
+To restore the correct permissions back to your user profile, run the following command in the root of your project:
+
+```bash
+sudo chown -R $USER:$USER .
+
+```
+
 ```bash
 # Run integration test suite
 npm test
