@@ -8,7 +8,7 @@ import type { RegisterInput, LoginInput, RefreshTokenInput } from './auth.schema
 
 export class AuthService {
   /**
-   * Registers a new user and hashes their password.
+   * Registers a new user, hashes their password, and issues tokens.
    */
   static async register(input: RegisterInput) {
     // 1. Check if user already exists
@@ -19,7 +19,7 @@ export class AuthService {
       .limit(1);
 
     if (existingUser) {
-      throw new AppError('Email is already registered', 409);
+      throw new AppError(409, 'Email is already registered');
     }
 
     // 2. Hash password
@@ -42,7 +42,29 @@ export class AuthService {
         createdAt: users.createdAt,
       });
 
-    return newUser;
+    // 4. Generate tokens for immediate authentication after registration
+    const tokenPayload = { userId: newUser.id, email: newUser.email, role: newUser.role };
+    const accessToken = JwtService.generateAccessToken(tokenPayload);
+    const refreshToken = JwtService.generateRefreshToken(tokenPayload);
+
+    // 5. Save refresh token in database
+    await db
+      .update(users)
+      .set({ refreshToken })
+      .where(eq(users.id, newUser.id));
+
+    return {
+      user: {
+        id: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+      },
+      tokens: {
+        accessToken,
+        refreshToken,
+      },
+    };
   }
 
   /**
@@ -57,18 +79,18 @@ export class AuthService {
       .limit(1);
 
     if (!user) {
-      throw new AppError('Invalid email or password', 401);
+      throw new AppError(401, 'Invalid email or password');
     }
 
     // 2. Verify password
     const isValidPassword = await PasswordService.verify(user.passwordHash, input.password);
 
     if (!isValidPassword) {
-      throw new AppError('Invalid email or password', 401);
+      throw new AppError(401, 'Invalid email or password');
     }
 
     // 3. Generate tokens
-    const tokenPayload = { sub: user.id, email: user.email, role: user.role };
+    const tokenPayload = { userId: user.id, email: user.email, role: user.role };
     const accessToken = JwtService.generateAccessToken(tokenPayload);
     const refreshToken = JwtService.generateRefreshToken(tokenPayload);
 
@@ -100,22 +122,22 @@ export class AuthService {
     try {
       payload = JwtService.verifyToken(input.refreshToken);
     } catch {
-      throw new AppError('Invalid or expired refresh token', 401);
+      throw new AppError(401, 'Invalid or expired refresh token');
     }
 
     // Check if refresh token matches the database record
     const [user] = await db
       .select()
       .from(users)
-      .where(eq(users.id, payload.sub))
+      .where(eq(users.id, payload.userId))
       .limit(1);
 
     if (!user || user.refreshToken !== input.refreshToken) {
-      throw new AppError('Invalid refresh token', 401);
+      throw new AppError(401, 'Invalid refresh token');
     }
 
     // Issue new tokens
-    const tokenPayload = { sub: user.id, email: user.email, role: user.role };
+    const tokenPayload = { userId: user.id, email: user.email, role: user.role };
     const newAccessToken = JwtService.generateAccessToken(tokenPayload);
     const newRefreshToken = JwtService.generateRefreshToken(tokenPayload);
 
@@ -126,8 +148,10 @@ export class AuthService {
       .where(eq(users.id, user.id));
 
     return {
-      accessToken: newAccessToken,
-      refreshToken: newRefreshToken,
+      tokens: {
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+      },
     };
   }
 
