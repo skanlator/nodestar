@@ -1,4 +1,3 @@
-
 # API Testing Guide
 
 This document outlines how to test the core authentication and user management endpoints of the **nodestar** application using `curl`.
@@ -23,13 +22,13 @@ The server will be available at `http://localhost:3000`.
 
 Creates a new user account in the database. The password must satisfy security requirements (including a special character).
 
-* **Endpoint:** `POST /auth/register`
+* **Endpoint:** `POST /api/auth/register`
 * **Content-Type:** `application/json`
 
 **cURL Command:**
 
 ```bash
-curl -X POST http://localhost:3000/auth/register \
+curl -X POST http://localhost:3000/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "name": "John Doe",
@@ -45,13 +44,13 @@ curl -X POST http://localhost:3000/auth/register \
 
 Authenticates user credentials and returns both an `accessToken` and a `refreshToken`.
 
-* **Endpoint:** `POST /auth/login`
+* **Endpoint:** `POST /api/auth/login`
 * **Content-Type:** `application/json`
 
 **cURL Command:**
 
 ```bash
-curl -X POST http://localhost:3000/auth/login \
+curl -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@example.com",
@@ -68,13 +67,13 @@ curl -X POST http://localhost:3000/auth/login \
 
 Issues a new pair of access and refresh tokens when provided with a valid refresh token.
 
-* **Endpoint:** `POST /auth/refresh`
+* **Endpoint:** `POST /api/auth/refresh`
 * **Content-Type:** `application/json`
 
 **cURL Command:**
 
 ```bash
-curl -X POST http://localhost:3000/auth/refresh \
+curl -X POST http://localhost:3000/api/auth/refresh \
   -H "Content-Type: application/json" \
   -d '{
     "refreshToken": "YOUR_REFRESH_TOKEN"
@@ -84,17 +83,23 @@ curl -X POST http://localhost:3000/auth/refresh \
 
 ---
 
-### 4. Access Protected Route (`/auth/me`)
+### 4. Access Protected Route (`/api/auth/me`)
 
 Retrieves the profile details of the currently authenticated user using the JWT Bearer token.
 
-* **Endpoint:** `GET /auth/me`
+* **Endpoint:** `GET /api/auth/me`
 * **Header:** `Authorization: Bearer <YOUR_ACCESS_TOKEN>`
 
 **cURL Command:**
 
 ```bash
-curl -X GET http://localhost:3000/auth/me \
+curl -X GET http://localhost:3000/api/auth/me \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+
+```
+
+```
+
+¡Guarda este contenido en tu archivo `.md` y tu documentación quedará impecable y lista para cualquier prueba!
 
 ```
