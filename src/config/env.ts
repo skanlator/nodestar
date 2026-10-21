@@ -11,6 +11,8 @@ const envSchema = z.object({
   JWT_EXPIRES_IN: z.string().default('1d'),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
   CORS_ORIGIN: z.string().default('*'),
+  // Secret key used for AES-256-GCM email encryption and blind indexing
+  ENCRYPTION_KEY: z.string().min(1, 'ENCRYPTION_KEY is required'),
 });
 
 const _env = envSchema.safeParse(process.env);
