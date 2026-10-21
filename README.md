@@ -27,39 +27,45 @@ The project follows a modular and scalable architecture designed for maintainabi
 
 ```text
 nodestar/
-├── drizzle/                  # Generated SQL migration files (Drizzle Kit)
+├── drizzle/                        # Generated SQL migration files (Drizzle Kit)
+│   ├── 0000_initial.sql            # Initial database schema
+│   └── 0001_magical_wolf_cub.sql   # Migration for encrypted email and emailHash (Blind Index)
 ├── src/
 │   ├── modules/
-│   │   └── auth/             # Authentication & User Management Module
-│   │       ├── auth.controller.ts # Request handlers for register, login, and profile
-│   │       ├── auth.routes.ts     # Route definitions (/register, /login, /me)
-│   │       ├── auth.schema.ts     # Zod validation schemas with strong password rules
-│   │       ├── auth.service.ts    # Business logic, security, and token handling
-│   │       ├── auth.test.ts       # Test suite for authentication flows
-│   │       └── auth.types.ts      # TypeScript interfaces (UserPayload, AuthResponse)
+│   │   └── auth/                   # Authentication & User Management Module
+│   │       ├── auth.controller.ts  # Request handlers for register, login, and profile
+│   │       ├── auth.routes.ts      # Route definitions (/api/auth/register, /login, /me, etc.)
+│   │       ├── auth.schema.ts      # Zod validation schemas with strong password rules
+│   │       ├── auth.service.ts     # Business logic, encryption/blind index integration & tokens
+│   │       ├── auth.test.ts        # Test suite for authentication flows
+│   │       └── auth.types.ts       # TypeScript interfaces (UserPayload, AuthResponse)
 │   ├── shared/
 │   │   ├── db/
-│   │   │   ├── schema/       # Database table schemas and relations
-│   │   │   │   ├── index.ts  # Central schema exports
-│   │   │   │   └── users.ts  # Users table definition
-│   │   │   ├── index.ts      # Drizzle database client initialization & connection
-│   │   │   └── migrate.ts    # Database migration execution script
-│   │   ├── logger/           # Pino structured logging configuration
-│   │   │   └── index.ts      # Logger instance setup
-│   │   ├── middlewares/      # Reusable Express middlewares
-│   │   │   ├── auth.middleware.ts     # JWT verification middleware for protected routes
-│   │   │   └── validate-request.ts    # Zod validation middleware wrapper
-│   │   └── utils/            # Shared helper functions & services
-│   │       └── jwt.ts        # JWT generation, verification & token utilities
-│   ├── types/                # Global TypeScript type definitions
-│   │   └── express.d.ts      # Express Request extensions (e.g., req.user payload)
-│   └── index.ts              # Application entry point, Express app & server bootstrap
-├── .env                      # Local environment variables (git-ignored)
-├── .env.example              # Environment variables template
-├── drizzle.config.ts         # Drizzle ORM configuration and SSL settings
-├── package.json              # Project dependencies, scripts, and metadata
-├── tsconfig.json             # TypeScript compiler options
-└── README.md                 # Project documentation
+│   │   │   ├── schema/             # Database table schemas and relations
+│   │   │   │   ├── index.ts        # Central schema exports
+│   │   │   │   └── users.ts        # Users table definition (updated with text email & emailHash)
+│   │   │   ├── index.ts            # Drizzle database client initialization & connection
+│   │   │   └── migrate.ts          # Database migration execution script
+│   │   ├── logger/                 # Pino structured logging configuration
+│   │   │   └── index.ts            # Logger instance setup
+│   │   ├── middlewares/            # Reusable Express middlewares
+│   │   │   ├── auth.middleware.ts  # JWT verification middleware for protected routes
+│   │   │   └── validate-request.ts # Zod validation middleware wrapper
+│   │   └── utils/                  # Shared helper functions & services
+│   │       ├── jwt.ts              # JWT generation, verification & token utilities
+│   │       └── encryption.ts       # AES-256-GCM encryption, decryption & HMAC-SHA256 Blind Index (NEW)
+│   ├── config/                     # Application and environment configurations
+│   │   └── env.ts                  # Zod-validated environment variables (includes ENCRYPTION_KEY)
+│   ├── types/                      # Global TypeScript type definitions
+│   │   └── express.d.ts            # Express Request extensions (e.g., req.user payload)
+│   └── index.ts                    # Application entry point, Express app & server bootstrap
+├── .env                            # Local environment variables with ENCRYPTION_KEY (git-ignored)
+├── .env.example                    # Environment variables template
+├── API Testing Guide.md            # Updated guide with /api/auth endpoints and curl commands
+├── drizzle.config.ts               # Drizzle ORM configuration and SSL settings
+├── package.json                    # Project dependencies, scripts, and metadata
+├── tsconfig.json                   # TypeScript compiler options
+└── README.md                       # Project documentation
 ```
 
 ---
