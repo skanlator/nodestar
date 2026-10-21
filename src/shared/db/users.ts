@@ -4,7 +4,13 @@ export const users = pgTable('users', {
   id: varchar('id', { length: 36 })
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  email: varchar('email', { length: 255 }).notNull().unique(),
+  
+  // Stores the AES-256-GCM encrypted email string (needs 'text' due to IV + auth tag length)
+  email: text('email').notNull(),
+  
+  // Deterministic HMAC-SHA256 hash for secure database lookups and unique constraint enforcement
+  emailHash: varchar('email_hash', { length: 64 }).notNull().unique(),
+  
   passwordHash: text('password_hash').notNull(),
   name: varchar('name', { length: 255 }),
   role: varchar('role', { length: 20 }).default('user').notNull(),
@@ -18,3 +24,4 @@ export const users = pgTable('users', {
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
+
