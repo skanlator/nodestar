@@ -137,7 +137,7 @@ After running this command, your user will own all project files again, and your
 # Run integration test suite
 npm test
 ```
-###Tip
+Tip
 
 If you ever need to generate a secure random 32-byte hex key in your terminal, you can run:
 
