@@ -3,21 +3,23 @@ import { db } from '../../shared/db/index';
 import { users } from '../../shared/db/users';
 import { PasswordService } from '../../shared/utils/password';
 import { JwtService } from '../../shared/utils/jwt';
+import { encrypt, decrypt, hashEmail } from '../../shared/utils/encryption';
 import { AppError } from '../../shared/errors/app-error';
 import type { RegisterInput, LoginInput, RefreshTokenInput } from './auth.schema';
 
 export class AuthService {
   /**
-   * Registers a new user, hashes their password, and issues tokens.
+   * Registers a new user, encrypts their email, generates a blind index, hashes their password, and issues tokens.
    */
   static async register(input: RegisterInput) {
-    const emailLower = input.email.toLowerCase();
+    const emailLower = input.email.toLowerCase().trim();
+    const emailHash = hashEmail(emailLower);
 
-    // 1. Check if user already exists
+    // 1. Check if user already exists using the blind index
     const [existingUser] = await db
       .select()
       .from(users)
-      .where(eq(users.email, emailLower))
+      .where(eq(users.emailHash, emailHash))
       .limit(1);
 
     if (existingUser) {
@@ -27,12 +29,16 @@ export class AuthService {
     // 2. Hash password
     const passwordHash = await PasswordService.hash(input.password);
 
-    // 3. Insert user into database
+    // 3. Encrypt email for secure storage at rest
+    const encryptedEmail = encrypt(emailLower);
+
+    // 4. Insert user into database with encrypted email and blind index
     const [newUser] = await db
       .insert(users)
       .values({
         name: input.name,
-        email: emailLower,
+        email: encryptedEmail,
+        emailHash,
         passwordHash,
         role: 'user',
       })
@@ -44,12 +50,12 @@ export class AuthService {
         createdAt: users.createdAt,
       });
 
-    // 4. Generate tokens for immediate authentication after registration
-    const tokenPayload = { userId: newUser.id, email: newUser.email, role: newUser.role };
+    // 5. Generate tokens for immediate authentication after registration
+    const tokenPayload = { userId: newUser.id, email: emailLower, role: newUser.role };
     const accessToken = JwtService.generateAccessToken(tokenPayload);
     const refreshToken = JwtService.generateRefreshToken(tokenPayload);
 
-    // 5. Save refresh token in database
+    // 6. Save refresh token in database
     await db
       .update(users)
       .set({ refreshToken })
@@ -59,7 +65,7 @@ export class AuthService {
       user: {
         id: newUser.id,
         name: newUser.name,
-        email: newUser.email,
+        email: emailLower,
         role: newUser.role,
       },
       tokens: {
@@ -70,16 +76,17 @@ export class AuthService {
   }
 
   /**
-   * Authenticates user, verifies password, and issues tokens.
+   * Authenticates user via blind index, verifies password, decrypts email, and issues tokens.
    */
   static async login(input: LoginInput) {
-    const emailLower = input.email.toLowerCase();
+    const emailLower = input.email.toLowerCase().trim();
+    const emailHash = hashEmail(emailLower);
 
-    // 1. Find user by email
+    // 1. Find user by email blind index
     const [user] = await db
       .select()
       .from(users)
-      .where(eq(users.email, emailLower))
+      .where(eq(users.emailHash, emailHash))
       .limit(1);
 
     if (!user) {
@@ -93,12 +100,15 @@ export class AuthService {
       throw new AppError(401, 'Invalid email or password');
     }
 
-    // 3. Generate tokens
-    const tokenPayload = { userId: user.id, email: user.email, role: user.role };
+    // 3. Decrypt email for token payload and response
+    const decryptedEmail = decrypt(user.email);
+
+    // 4. Generate tokens
+    const tokenPayload = { userId: user.id, email: decryptedEmail, role: user.role };
     const accessToken = JwtService.generateAccessToken(tokenPayload);
     const refreshToken = JwtService.generateRefreshToken(tokenPayload);
 
-    // 4. Save refresh token in database
+    // 5. Save refresh token in database
     await db
       .update(users)
       .set({ refreshToken })
@@ -108,7 +118,7 @@ export class AuthService {
       user: {
         id: user.id,
         name: user.name,
-        email: user.email,
+        email: decryptedEmail,
         role: user.role,
       },
       tokens: {
@@ -140,8 +150,10 @@ export class AuthService {
       throw new AppError(401, 'Invalid refresh token');
     }
 
+    const decryptedEmail = decrypt(user.email);
+
     // Issue new tokens
-    const tokenPayload = { userId: user.id, email: user.email, role: user.role };
+    const tokenPayload = { userId: user.id, email: decryptedEmail, role: user.role };
     const newAccessToken = JwtService.generateAccessToken(tokenPayload);
     const newRefreshToken = JwtService.generateRefreshToken(tokenPayload);
 
